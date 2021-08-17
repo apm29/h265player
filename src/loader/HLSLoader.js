@@ -70,7 +70,6 @@ class HLSLoader extends BaseLoader {
   parsePlaylist(source, callback) {
     try {
       const data = new M3U8Parser(source)
-      console.log(data)
       if ((!data.masterPlaylist || !data.masterPlaylist.length) && (!data.segments || !data.segments.length)) {
         this.events.emit(Events.LoaderError, data)
         this.events.emit(Events.PlayerAlert, 'Parse playlist file error.')
@@ -160,7 +159,7 @@ class HLSLoader extends BaseLoader {
 
   /**
    * load ts file by segment
-   * @param {Segment} segment
+   * aram {Segment} segment
    * @param {String} type [optional] 'seek' or 'play'
    * @param {Number} time [optional] millisecond
    */
@@ -184,10 +183,7 @@ class HLSLoader extends BaseLoader {
     this.currentNo = segment.no
 
     const baseUrl = this.getBaseUrl(segment.file)
-    console.log(segment.file)
-    console.log(baseUrl)
     let url = baseUrl + segment.file
-    console.log(url)
     let retryCount = 1
 
     const _getRequestURL = (url, segment) => {

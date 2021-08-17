@@ -120,7 +120,6 @@ export class M3U8Parser {
   }
 
   readLine(line) {
-    console.log("line.startsWith(matchers.segmentPrefix)",line.startsWith(matchers.segmentPrefix))
     if (line.startsWith(matchers.segmentPrefix)) {
       return this.readSegment(line)
     }
@@ -129,7 +128,6 @@ export class M3U8Parser {
     }
 
     let tag = this.readTag(line)
-    console.log("tag",tag)
     if (!tag) {
       return
     }
