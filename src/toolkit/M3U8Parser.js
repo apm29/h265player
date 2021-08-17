@@ -223,8 +223,6 @@ export class M3U8Parser {
       logger.error('parse', 'it is not a valid  m3u8 header', 'header:', lines[0])
       return
     }
-    console.log("lines",lines)
-    console.log("_state",this._state)
     lines.forEach((line) => {
       if (matchers.canStrip(line)) {
         return
