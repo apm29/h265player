@@ -60,6 +60,7 @@ class Player extends BaseClass {
   autoPlay = true
   duration = 0
   tsNumber = 0
+  isLive = false
  /**
   * @property {string} sourceURL - The url of the video to play
   * @property {string} source - The url of the video to play
@@ -74,7 +75,7 @@ class Player extends BaseClass {
            {"url":"http://localhost/20190902/78/6c/5a5a99476f4f792e2e7a701ba1f6d5ad.m3u8","id":264,"name":"极速","value":"jisu"},
            {"url":"http://localhost/20190902/54/05/7e714a321d9e7d92c937582b2e439833.m3u8","id":265,"name":"流畅","value":"300"}]
        }
-  * @property {Function} processURL - process the url of video source 
+  * @property {Function} processURL - process the url of video source
   * @property {Number} maxBufferLength - The maximum value of the buffer, its default value is 5000(ms)
   * @property {Boolean} autoPlay - If auto play after initializing the Player
   * @property {string} libPath - The path of decoder
@@ -85,6 +86,7 @@ class Player extends BaseClass {
   * @property {AlertError} alertError - The alert info when error happens
   * @property {Worker} httpWorker - set User's web worker
   * @property {Function} afterLoadPlaylist - To handle operations after playlist is loaded
+  * @property {Boolean} isLive - If the video type is live
  */
   constructor (el, options = {}) {
     super()
@@ -106,6 +108,7 @@ class Player extends BaseClass {
     this.startTime = options.startTime === undefined ? this.startTime : options.startTime
     this.originStartTime = this.startTime
     this.playbackRate = options.playbackRate === undefined ? this.playbackRate : options.playbackRate
+    this.isLive = options.isLive !== undefined ? options.isLive : this.isLive
   }
   setAlertError () {
     this.options.alertError = this.alertError = AlertError.getInstance({
@@ -224,6 +227,13 @@ class Player extends BaseClass {
     this.bindEvent()
   }
   bindEvent () {
+    this.events.on(Events.LoaderNextPlayListLoaded, (index, length, duration) => {
+      this.duration += duration
+      this.streamController.setBaseInfo({
+        tsNumber: index + length - 1,
+        duration: this.duration,
+      })
+    })
     this.events.on(Events.PlayerOnPlay, () => {
       this.play()
     })
@@ -254,7 +264,7 @@ class Player extends BaseClass {
       this.changeRate(data)
     })
     this.events.on(Events.PlayerWait, () => {
-      this.onWait() 
+      this.onWait()
     })
     this.events.on(Events.PlayerPlay, () => {
       this.onPlay()
@@ -329,7 +339,7 @@ class Player extends BaseClass {
    * @method
    * @name changeRate
    * @param {Object} data - The url of the video source
-   * @param {function} callback - Function to handle after changing the video source 
+   * @param {function} callback - Function to handle after changing the video source
    * @description Change the rate of the video source, such as 720P, HD...*/
   changeRate (data) {
     this.pause()
@@ -346,7 +356,7 @@ class Player extends BaseClass {
    * @method
    * @name changeSrc
    * @param {string} url - The url of the video source
-   * @param {function} callback - Function to handle after changing the video source 
+   * @param {function} callback - Function to handle after changing the video source
    * @description Change the source of the video to play*/
   changeSrc (url, callback) {
     this.pause()

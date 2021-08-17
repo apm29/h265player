@@ -2,7 +2,7 @@
  * @copyright: Copyright (C) 2019
  * @file LoadData
  * @desc
- * ts load and data format 
+ * ts load and data format
  * @author Jarry
  */
 
@@ -50,6 +50,9 @@ class LoadData extends BaseClass {
       if (time === this.startLoadTime) {
         this.events.emit(Events.LoadDataFirstLoaded, buffer, time)
       }
+    })
+    this.events.on(Events.LoaderNextPlayListLoaded, (index, length) => {
+      this.loadSegmentByNo(index)
     })
   }
 
@@ -147,8 +150,8 @@ class LoadData extends BaseClass {
 
   /**
    * get buffer from bufferPool and the blob will convert to arrayBuffer
-   * @param {number} time 
-   * @param {Function} callback [optional] 
+   * @param {number} time
+   * @param {Function} callback [optional]
    */
   readBufferByNo(no, callback) {
     if (!this.isValidSegmentNo(no)) {
@@ -164,7 +167,7 @@ class LoadData extends BaseClass {
 
   /**
    * get segment from segment by time
-   * @param {number} time 
+   * @param {number} time
    */
   getSegmentByTime(time) {
     const idx = this.segmentPool.indexOfByTime(time)
@@ -208,7 +211,7 @@ class LoadData extends BaseClass {
       }
       if (this.bufferPool.indexOfByKey('no', buffer.no)) {
         return true
-      }      
+      }
       this.bufferPool.splice(0, this.bufferPool.length)
     }
     this.bufferPool.push(buffer)
@@ -219,7 +222,7 @@ class LoadData extends BaseClass {
     // remove all segment before the time
     this.bufferPool.splice(0, idx + 1)
   }
-  
+
   removeBufferByNo(no) {
     const idx = this.bufferPool.indexOfByKey('no', no)
     if (idx <= -1) {

@@ -31,6 +31,7 @@ class HLSLoader extends BaseLoader {
 
   currentNo = null
   maxRetryCount = BUFFER.maxRetryCount
+  end = 0
 
   constructor(options) {
     super()
@@ -41,13 +42,13 @@ class HLSLoader extends BaseLoader {
     this.setSegmentPool(new SegmentPool())
   }
 
-  loadPlaylist(callback) {
+  loadPlaylist(callback,url = this.sourceURL ) {
     this.httpWorker.postMessage({
       type: 'invoke',
       fileType: 'm3u8',
       method: 'get',
       name: 'playlist',
-      url: this.sourceURL
+      url: url
     })
     this.httpWorker.onmessage = (event) => {
       const data = event.data
@@ -67,23 +68,41 @@ class HLSLoader extends BaseLoader {
   }
 
   parsePlaylist(source, callback) {
-    const data = new M3U8Parser(source)
-    if (!data.segments || !data.segments.length) {
-      this.events.emit(Events.LoaderError, data)
-      this.events.emit(Events.PlayerAlert, 'Parse playlist file error.')
-      const errors = [this.state, 'Parse playlist error.', 'data:', data]
-      this.events.emit(Events.PlayerThrowError, errors)
-      return
+    try {
+      const data = new M3U8Parser(source)
+      console.log(data)
+      if ((!data.masterPlaylist || !data.masterPlaylist.length) && (!data.segments || !data.segments.length)) {
+        this.events.emit(Events.LoaderError, data)
+        this.events.emit(Events.PlayerAlert, 'Parse playlist file error.')
+        const errors = [this.state, 'Parse playlist error.', 'data:', data]
+        this.events.emit(Events.PlayerThrowError, errors)
+        return
+      }
+      if(data.masterPlaylist && data.masterPlaylist.length){
+        data.masterPlaylist.forEach(playlist=>{
+          this.loadPlaylist(callback,this.getBaseUrl(playlist)+ playlist)
+        })
+        return
+      }
+      let segments = []
+      data.segments.forEach(item => {
+        if (this.segmentPool.getBy(segment => item.name === segment.name).length !==
+          0) { // 去重
+          return
+        }
+        item.start = Utils.msec2sec(item.start) + this.end
+        item.end = Utils.msec2sec(item.end) + this.end
+        item.duration = Utils.msec2sec(item.duration)
+        segments.push(item)
+      })
+      this.end = segments[segments.length - 1].end
+      data.segments = segments
+      this.setSourceData(Object.freeze(data))
+      this.segmentPool.addAll(data.segments)
+      callback.call(this, data)
+    } catch (e) {
+      console.log(e)
     }
-    let segments = data.segments
-    segments.forEach(item => {
-      item.start = Utils.msec2sec(item.start)
-      item.end = Utils.msec2sec(item.end)
-      item.duration = Utils.msec2sec(item.duration)
-    })
-    this.setSourceData(Object.freeze(data))
-    this.segmentPool.addAll(data.segments)
-    callback.call(this, data)
   }
 
   setSourceData(sourceData) {
@@ -115,8 +134,10 @@ class HLSLoader extends BaseLoader {
     const sourceURL = this.options.sourceURL
     const isAbsolute = file.indexOf('//') > -1
     if (!isAbsolute) {
+      const url = new URL(sourceURL)
       const lastSlash = sourceURL.lastIndexOf('/')
-      return sourceURL.substr(0, lastSlash + 1)
+      //return sourceURL.substr(0, lastSlash + 1)
+      return url.protocol+'//'+ url.host
     }
     return ''
   }
@@ -137,7 +158,7 @@ class HLSLoader extends BaseLoader {
 
   /**
    * load ts file by segment
-   * @param {Segment} segment 
+   * @param {Segment} segment
    * @param {String} type [optional] 'seek' or 'play'
    * @param {Number} time [optional] millisecond
    */
@@ -161,7 +182,10 @@ class HLSLoader extends BaseLoader {
     this.currentNo = segment.no
 
     const baseUrl = this.getBaseUrl(segment.file)
+    console.log(segment.file)
+    console.log(baseUrl)
     let url = baseUrl + segment.file
+    console.log(url)
     let retryCount = 1
 
     const _getRequestURL = (url, segment) => {

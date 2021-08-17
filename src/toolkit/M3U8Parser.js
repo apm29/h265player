@@ -57,6 +57,7 @@ const segment = {
 export class M3U8Parser {
   source = ''
   segments = []
+  masterPlaylist = []
   _currentSegment = null
   discontinuous = null
   tags = {
@@ -114,12 +115,21 @@ export class M3U8Parser {
     }
   }
 
+  readPlaylist(line){
+    this.masterPlaylist.push(line)
+  }
+
   readLine(line) {
+    console.log("line.startsWith(matchers.segmentPrefix)",line.startsWith(matchers.segmentPrefix))
     if (line.startsWith(matchers.segmentPrefix)) {
       return this.readSegment(line)
     }
+    if(line.indexOf(".m3u8")>=0){
+      return this.readPlaylist(line)
+    }
 
     let tag = this.readTag(line)
+    console.log("tag",tag)
     if (!tag) {
       return
     }
@@ -192,7 +202,7 @@ export class M3U8Parser {
     try {
       url = new URL(line)
       let sd = url.searchParams.get('sd')
-      
+
       if(sd) {
         result = parseInt(sd, 10)
       }
@@ -215,7 +225,8 @@ export class M3U8Parser {
       logger.error('parse', 'it is not a valid  m3u8 header', 'header:', lines[0])
       return
     }
-
+    console.log("lines",lines)
+    console.log("_state",this._state)
     lines.forEach((line) => {
       if (matchers.canStrip(line)) {
         return

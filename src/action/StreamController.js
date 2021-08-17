@@ -1,7 +1,7 @@
 /**
  * @copyright: Copyright (C) 2019
  * @desc: the player main stream controller, start demux and decode, load next ts packet
- * @author: liuliguo 
+ * @author: liuliguo
  * @file: StreamController.js
  */
 
@@ -198,7 +198,11 @@ export default class StreamController extends BaseClass {
       if (data.no === this.tsNumber) {
         //the last one ts packet
         this.logger.info('onRead', 'the last ts')
-        this.events.emit(Events.DemuxLast)
+        if(this.player.isLive) {
+          this.events.emit(Events.LastTSFileLoaded)
+        } else {
+          this.events.emit(Events.DemuxLast)
+        }
       }
       this.events.emit(Events.DemuxStartDemux, data)
     } else {

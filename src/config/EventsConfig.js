@@ -1,7 +1,7 @@
 /**
  * @copyright: Copyright (C) 2019
  * @desc: events object
- * @author: liuliguo 
+ * @author: liuliguo
  * @file: EventsConfig.js
  */
 
@@ -38,7 +38,7 @@ const Events = {
   LoadDataRead: 'LoadData.onRead',
   LoadDataSeek: 'LoadData.onSeek',
   LoadDataFirstLoaded: 'LoadData.onFirstLoaded',
-  
+
   LoaderPlayListStart: 'Loader.playlistStart',
   LoaderLoading: 'Loader.onLoading',
   LoaderError: 'Loader.onError',
@@ -47,6 +47,8 @@ const Events = {
   LoaderLoadFile: 'Loader.loadFile',
   LoaderPlayListLoaded: 'Loader.playlistLoaded',
 
+  LastTSFileLoaded: 'Loader.lastTSFileLoaded',
+  LoaderNextPlayListLoaded: 'Loader.loaderNextPlayListLoaded',
   AudioPlayerReady: 'AudioPlayer.MSEReady',
   AudioPlayerDataReady: 'AudioPlayer.dataReady',
   AudioPlayerWait: 'AudioPlayer.wait',
@@ -74,7 +76,7 @@ const Events = {
    * Event handling during player playing
    * @event Player#play
    * @type {Player}
-   * 
+   *
   */
   PlayerPlay: 'Player.play',
   PlayerReset: 'Player.reset',
@@ -83,21 +85,21 @@ const Events = {
    * Event handling after playing ends
    * @event Player#end
    * @type {Player}
-   * 
+   *
   */
   PlayerEnd: 'Player.end',
   /**
    * Event handling when playing pauses
    * @event Player#pause
    * @type {Player}
-   * 
+   *
   */
   PlayerPause: 'Player.pause',
   /**
    * Event handling when player seeking data
    * @event Player#seeking
    * @type {Player}
-   * 
+   *
   */
   PlayerSeeking: 'Player.seeking',
   PlayerAlert: 'Player.alert',
