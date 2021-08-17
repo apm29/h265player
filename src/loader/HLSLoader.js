@@ -134,9 +134,11 @@ class HLSLoader extends BaseLoader {
     const sourceURL = this.options.sourceURL
     const isAbsolute = file.indexOf('//') > -1
     if (!isAbsolute) {
+      if(file.indexOf("/")!==0){
+        const lastSlash = sourceURL.lastIndexOf('/')
+        return sourceURL.substr(0, lastSlash + 1)
+      }
       const url = new URL(sourceURL)
-      const lastSlash = sourceURL.lastIndexOf('/')
-      //return sourceURL.substr(0, lastSlash + 1)
       return url.protocol+'//'+ url.host
     }
     return ''
